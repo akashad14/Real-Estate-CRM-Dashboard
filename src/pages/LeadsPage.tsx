@@ -10,9 +10,11 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Typography,
+  Card,
+  CardContent,
 } from "@mui/material";
 import Layout from "../components/layout/Layout";
-import LeadForm from "../components/lead/LeadForm"; // Ensure correct import
 
 interface Lead {
   id: number;
@@ -24,102 +26,251 @@ const LeadsPage: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([
     { id: 1, name: "John Doe", phone: "1234567890" },
     { id: 2, name: "Jane Smith", phone: "0987654321" },
-    { id: 3, name: "Alice Johnson", phone: "1112223333" },
-    { id: 4, name: "Bob Brown", phone: "4445556666" },
-    { id: 5, name: "Charlie White", phone: "7778889999" },
-    { id: 6, name: "David Black", phone: "1011121314" },
+    { id: 3, name: "Bob Brown", phone: "4445556666" },
+    { id: 4, name: "Charlie White", phone: "7778889999" },
+    { id: 5, name: "David Black", phone: "1011121314" },
   ]);
-  
-  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [showEditPanel, setShowEditPanel] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
 
   const handleAddLead = () => {
-    setEditingLead(null);
-    setIsFormOpen(true);
+    const newErrors: { name?: string; phone?: string } = {};
+    if (!name.trim()) newErrors.name = "Name is required";
+    if (!phone.trim()) newErrors.phone = "Phone number is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    const newLead = { id: leads.length + 1, name, phone };
+    setLeads([...leads, newLead]);
+    handleCancel(); // Reset form and hide
   };
 
   const handleEditLead = (lead: Lead) => {
     setEditingLead(lead);
-    setIsFormOpen(true);
+    setShowEditPanel(true);
+  };
+
+  const handleUpdateLead = () => {
+    if (!editingLead) return;
+
+    if (!editingLead.name.trim() || !editingLead.phone.trim()) {
+      setErrors({
+        name: editingLead.name ? "" : "Name is required",
+        phone: editingLead.phone ? "" : "Phone number is required",
+      });
+      return;
+    }
+
+    setLeads((prevLeads) =>
+      prevLeads.map((lead) =>
+        lead.id === editingLead.id ? { ...editingLead } : lead
+      )
+    );
+    handleCancel();
   };
 
   const handleDeleteLead = (id: number) => {
     if (window.confirm("Are you sure you want to delete this lead?")) {
       setLeads(leads.filter((lead) => lead.id !== id));
+      if (editingLead?.id === id) {
+        handleCancel();
+      }
     }
   };
 
-  const handleSubmitLead = (data: { name: string; phone: string }) => {
-    if (editingLead) {
-      // Update existing lead
-      const updatedLeads = leads.map((lead) =>
-        lead.id === editingLead.id ? { ...lead, ...data } : lead
-      );
-      setLeads(updatedLeads);
-    } else {
-      // Add new lead
-      const newLead = { id: leads.length + 1, ...data };
-      setLeads([...leads, newLead]);
-    }
-    setIsFormOpen(false);
+  const handleCancel = () => {
+    setEditingLead(null);
+    setName("");
+    setPhone("");
+    setErrors({});
+    setShowForm(false);
+    setShowEditPanel(false);
   };
 
   const filteredLeads = leads.filter(
     (lead) =>
-      lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.phone.includes(searchTerm)
+      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.phone.includes(searchQuery)
   );
 
   return (
     <Layout>
-      <Box>
+      {/* Top Section: Search Bar & Create Button (Aligned Left) */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, mt: 2 }}>
         <TextField
           label="Search by Name or Phone"
           variant="outlined"
-          fullWidth
-          margin="normal"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ width: 250 }}
         />
-        <Button variant="contained" color="primary" onClick={handleAddLead}>
-          Add New Lead
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "black",
+            color: "white",
+            "&:hover": { backgroundColor: "#333" },
+          }}
+          onClick={() => setShowForm(true)}
+        >
+          Create Lead
         </Button>
-        {isFormOpen && (
-          <LeadForm
-            initialData={editingLead || undefined}
-            onSubmit={handleSubmitLead}
-            onCancel={() => setIsFormOpen(false)}
-          />
-        )}
-        <TableContainer component={Paper} sx={{ mt: 2 }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Phone Number</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredLeads.map((lead) => (
+      </Box>
+
+      {/* Add Lead Form */}
+      {showForm && (
+        <Card sx={{ width: 350, mb: 3 }}>
+          <CardContent>
+            <Typography variant="h5" fontWeight="bold">Add New Lead</Typography>
+            <TextField
+              fullWidth
+              label="Name"
+              variant="outlined"
+              margin="normal"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              error={!!errors.name}
+              helperText={errors.name}
+            />
+            <TextField
+              fullWidth
+              label="Phone Number"
+              variant="outlined"
+              margin="normal"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              error={!!errors.phone}
+              helperText={errors.phone}
+            />
+            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "black",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#333" },
+                  flex: 1,
+                }}
+                onClick={handleAddLead}
+              >
+                Save Lead
+              </Button>
+              <Button variant="outlined" sx={{ flex: 1 }} onClick={handleCancel}>
+                Cancel
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Edit Lead Panel */}
+      {showEditPanel && editingLead && (
+        <Card sx={{ width: 350, mb: 3 }}>
+          <CardContent>
+            <Typography variant="h5" fontWeight="bold">Edit Lead</Typography>
+            <TextField
+              fullWidth
+              label="Name"
+              variant="outlined"
+              margin="normal"
+              value={editingLead.name}
+              onChange={(e) =>
+                setEditingLead({ ...editingLead, name: e.target.value })
+              }
+              error={!!errors.name}
+              helperText={errors.name}
+            />
+            <TextField
+              fullWidth
+              label="Phone Number"
+              variant="outlined"
+              margin="normal"
+              value={editingLead.phone}
+              onChange={(e) =>
+                setEditingLead({ ...editingLead, phone: e.target.value })
+              }
+              error={!!errors.phone}
+              helperText={errors.phone}
+            />
+            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "black",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#333" },
+                  flex: 1,
+                }}
+                onClick={handleUpdateLead}
+              >
+                Update Lead
+              </Button>
+              <Button variant="outlined" sx={{ flex: 1 }} onClick={handleCancel}>
+                Cancel
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Lead Table */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><b>Name</b></TableCell>
+              <TableCell><b>Phone Number</b></TableCell>
+              <TableCell><b>Actions</b></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredLeads.length > 0 ? (
+              filteredLeads.map((lead) => (
                 <TableRow key={lead.id}>
                   <TableCell>{lead.name}</TableCell>
                   <TableCell>{lead.phone}</TableCell>
                   <TableCell>
-                    <Button onClick={() => handleEditLead(lead)} sx={{ mr: 1 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "black",
+                        color: "white",
+                        "&:hover": { backgroundColor: "#333" },
+                        mr: 1,
+                      }}
+                      onClick={() => handleEditLead(lead)}
+                    >
                       Edit
                     </Button>
-                    <Button onClick={() => handleDeleteLead(lead.id)} color="error">
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleDeleteLead(lead.id)}
+                    >
                       Delete
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} align="center">
+                  No matching leads found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Layout>
   );
 };

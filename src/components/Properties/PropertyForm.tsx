@@ -34,6 +34,16 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ initialData, onSubmit, onCa
     if (!budget.trim()) newErrors.budget = "Budget is required";
     if (!availability.trim()) newErrors.availability = "Availability is required";
 
+    // Ensure budget starts with a dollar sign
+    if (budget.trim() && !budget.trim().startsWith("$")) {
+      newErrors.budget = "Budget must start with a dollar sign ($)";
+    }
+
+    // Ensure size includes 'sq ft'
+    if (size.trim() && !size.trim().toLowerCase().includes("sq ft")) {
+      newErrors.size = "Size must include 'sq ft'";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -41,7 +51,18 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ initialData, onSubmit, onCa
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit({ type, size, location, budget, availability });
+      // Ensure budget starts with a dollar sign
+      const formattedBudget = budget.trim().startsWith("$") ? budget.trim() : `$${budget.trim()}`;
+      // Ensure size includes 'sq ft'
+      const formattedSize = size.trim().toLowerCase().includes("sq ft") ? size.trim() : `${size.trim()} sq ft`;
+
+      onSubmit({
+        type,
+        size: formattedSize,
+        location,
+        budget: formattedBudget,
+        availability,
+      });
     }
   };
 
@@ -58,14 +79,14 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ initialData, onSubmit, onCa
       </FormControl>
 
       <TextField
-        label="Size"
+        label="Size (sq ft)"
         variant="outlined"
         fullWidth
         margin="normal"
         value={size}
         onChange={(e) => setSize(e.target.value)}
         error={!!errors.size}
-        helperText={errors.size}
+        helperText={errors.size || "Example: 1500 sq ft"}
       />
       <TextField
         label="Location"
@@ -78,14 +99,14 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ initialData, onSubmit, onCa
         helperText={errors.location}
       />
       <TextField
-        label="Budget"
+        label="Budget ($)"
         variant="outlined"
         fullWidth
         margin="normal"
         value={budget}
         onChange={(e) => setBudget(e.target.value)}
         error={!!errors.budget}
-        helperText={errors.budget}
+        helperText={errors.budget || "Example: $500,000"}
       />
       <TextField
         label="Availability"
@@ -105,6 +126,15 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ initialData, onSubmit, onCa
         <Button variant="outlined" onClick={onCancel} sx={{ mr: 2 }}>
           Cancel
         </Button>
+        {initialData?.id && onDelete && (
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => onDelete(initialData.id!)}
+          >
+            Delete Property
+          </Button>
+        )}
       </Box>
     </Box>
   );
