@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import Layout from '../components/layout/Layout';
-import LeadForm from '../components/lead/LeadForm'; // Ensure correct import
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
+import Layout from "../components/layout/Layout";
+import LeadForm from "../components/lead/LeadForm"; // Ensure correct import
 
 interface Lead {
   id: number;
@@ -11,18 +22,17 @@ interface Lead {
 
 const LeadsPage: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([
-    { id: 1, name: 'John Doe', phone: '1234567890' },
-    { id: 2, name: 'Jane Smith', phone: '0987654321' },
-    { id: 3, name: 'Alice Johnson', phone: '1112223333' },
-    { id: 4, name: 'Bob Brown', phone: '4445556666' },
-    { id: 5, name: 'Charlie White', phone: '7778889999' },
-    { id: 6, name: 'David Black', phone: '1011121314' },
-    
-    
+    { id: 1, name: "John Doe", phone: "1234567890" },
+    { id: 2, name: "Jane Smith", phone: "0987654321" },
+    { id: 3, name: "Alice Johnson", phone: "1112223333" },
+    { id: 4, name: "Bob Brown", phone: "4445556666" },
+    { id: 5, name: "Charlie White", phone: "7778889999" },
+    { id: 6, name: "David Black", phone: "1011121314" },
   ]);
+  
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleAddLead = () => {
     setEditingLead(null);
@@ -32,6 +42,12 @@ const LeadsPage: React.FC = () => {
   const handleEditLead = (lead: Lead) => {
     setEditingLead(lead);
     setIsFormOpen(true);
+  };
+
+  const handleDeleteLead = (id: number) => {
+    if (window.confirm("Are you sure you want to delete this lead?")) {
+      setLeads(leads.filter((lead) => lead.id !== id));
+    }
   };
 
   const handleSubmitLead = (data: { name: string; phone: string }) => {
@@ -76,7 +92,7 @@ const LeadsPage: React.FC = () => {
             onCancel={() => setIsFormOpen(false)}
           />
         )}
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ mt: 2 }}>
           <Table>
             <TableHead>
               <TableRow>
@@ -91,7 +107,12 @@ const LeadsPage: React.FC = () => {
                   <TableCell>{lead.name}</TableCell>
                   <TableCell>{lead.phone}</TableCell>
                   <TableCell>
-                    <Button onClick={() => handleEditLead(lead)}>Edit</Button>
+                    <Button onClick={() => handleEditLead(lead)} sx={{ mr: 1 }}>
+                      Edit
+                    </Button>
+                    <Button onClick={() => handleDeleteLead(lead.id)} color="error">
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
