@@ -1,6 +1,6 @@
 ## Live Preview Vercel Hosting.
 
------- https://real-estate-crm-dashboard.vercel.app/dashboard-------
+https://real-estate-crm-dashboard.vercel.app/dashboard
 
 
 ## Frontend technologies:
