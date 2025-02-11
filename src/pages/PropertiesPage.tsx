@@ -10,9 +10,12 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Typography,
+  Card,
+  CardContent,
 } from "@mui/material";
 import Layout from "../components/layout/Layout";
-import PropertyForm from "../components/Properties/PropertyForm"; // Ensure correct import
+import PropertyForm from "../components/Properties/PropertyForm";
 
 interface Property {
   id: number;
@@ -32,10 +35,11 @@ const PropertiesPage: React.FC = () => {
     { id: 6, type: "Residential", size: "1800 sq ft", location: "San Diego, CA", budget: "$750,000", availability: "2 months" },
     { id: 7, type: "Commercial", size: "7000 sq ft", location: "San Francisco, CA", budget: "$3,000,000", availability: "9 months" },
   ]);
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleAddProperty = () => {
     setEditingProperty(null);
@@ -78,40 +82,60 @@ const PropertiesPage: React.FC = () => {
 
   return (
     <Layout>
-      <Box>
+      {/* Top Section: Search Bar & Create Button (Aligned Left) */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, mt: 2 }}>
         <TextField
           label="Search by Type, Location, Budget, or Availability"
           variant="outlined"
-          fullWidth
-          margin="normal"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ width: 350 }}
         />
-        <Button variant="contained" color="primary" onClick={handleAddProperty}>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "black",
+            color: "white",
+            "&:hover": { backgroundColor: "#333" },
+          }}
+          onClick={handleAddProperty}
+        >
           Add Property
         </Button>
-        {isFormOpen && (
-          <PropertyForm
-            initialData={editingProperty || undefined}
-            onSubmit={handleSubmitProperty}
-            onCancel={() => setIsFormOpen(false)}
-            onDelete={handleDeleteProperty}
-          />
-        )}
-        <TableContainer component={Paper} sx={{ mt: 2 }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Type</TableCell>
-                <TableCell>Size</TableCell>
-                <TableCell>Location</TableCell>
-                <TableCell>Budget</TableCell>
-                <TableCell>Availability</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredProperties.map((property) => (
+      </Box>
+
+      {/* Add/Edit Property Form */}
+      {isFormOpen && (
+        <Card sx={{ width: 350, mb: 3 }}>
+          <CardContent>
+            <Typography variant="h5" fontWeight="bold">
+              {editingProperty ? "Edit Property" : "Add New Property"}
+            </Typography>
+            <PropertyForm
+              initialData={editingProperty || undefined}
+              onSubmit={handleSubmitProperty}
+              onCancel={() => setIsFormOpen(false)}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Property Table */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><b>Type</b></TableCell>
+              <TableCell><b>Size</b></TableCell>
+              <TableCell><b>Location</b></TableCell>
+              <TableCell><b>Budget</b></TableCell>
+              <TableCell><b>Availability</b></TableCell>
+              <TableCell><b>Actions</b></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredProperties.length > 0 ? (
+              filteredProperties.map((property) => (
                 <TableRow key={property.id}>
                   <TableCell>{property.type}</TableCell>
                   <TableCell>{property.size}</TableCell>
@@ -119,19 +143,38 @@ const PropertiesPage: React.FC = () => {
                   <TableCell>{property.budget}</TableCell>
                   <TableCell>{property.availability}</TableCell>
                   <TableCell>
-                    <Button onClick={() => handleEditProperty(property)} sx={{ mr: 1 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "black",
+                        color: "white",
+                        "&:hover": { backgroundColor: "#333" },
+                        mr: 1,
+                      }}
+                      onClick={() => handleEditProperty(property)}
+                    >
                       Edit
                     </Button>
-                    <Button onClick={() => handleDeleteProperty(property.id)} color="error">
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleDeleteProperty(property.id)}
+                    >
                       Delete
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  No matching properties found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Layout>
   );
 };
