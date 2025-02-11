@@ -1,4 +1,4 @@
-// src/components/Properties/PropertiesList.tsx
+
 import React from 'react';
 import { List, ListItem, ListItemText } from '@mui/material';
 

@@ -13,22 +13,34 @@ import {
   Typography,
   Card,
   CardContent,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
 } from "@mui/material";
+import { Delete } from "@mui/icons-material";
 import Layout from "../components/layout/Layout";
+
+interface Document {
+  id: number;
+  name: string;
+  file: File;
+}
 
 interface Lead {
   id: number;
   name: string;
   phone: string;
+  documents: Document[];
 }
 
 const LeadsPage: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([
-    { id: 1, name: "John Doe", phone: "1234567890" },
-    { id: 2, name: "Jane Smith", phone: "0987654321" },
-    { id: 3, name: "Bob Brown", phone: "4445556666" },
-    { id: 4, name: "Charlie White", phone: "7778889999" },
-    { id: 5, name: "David Black", phone: "1011121314" },
+    { id: 1, name: "John Doe", phone: "1234567890", documents: [] },
+    { id: 2, name: "Jane Smith", phone: "0987654321", documents: [] },
+    { id: 3, name: "Bob Brown", phone: "4445556666", documents: [] },
+    { id: 4, name: "Charlie White", phone: "7778889999", documents: [] },
+    { id: 5, name: "David Black", phone: "1011121314", documents: [] },
   ]);
 
   const [name, setName] = useState("");
@@ -49,7 +61,7 @@ const LeadsPage: React.FC = () => {
       return;
     }
 
-    const newLead = { id: leads.length + 1, name, phone };
+    const newLead = { id: leads.length + 1, name, phone, documents: [] };
     setLeads([...leads, newLead]);
     handleCancel(); // Reset form and hide
   };
@@ -85,6 +97,33 @@ const LeadsPage: React.FC = () => {
         handleCancel();
       }
     }
+  };
+
+  const handleUploadDocument = (leadId: number, file: File) => {
+    const updatedLeads = leads.map((lead) =>
+      lead.id === leadId
+        ? {
+            ...lead,
+            documents: [
+              ...lead.documents,
+              { id: lead.documents.length + 1, name: file.name, file },
+            ],
+          }
+        : lead
+    );
+    setLeads(updatedLeads);
+  };
+
+  const handleDeleteDocument = (leadId: number, documentId: number) => {
+    const updatedLeads = leads.map((lead) =>
+      lead.id === leadId
+        ? {
+            ...lead,
+            documents: lead.documents.filter((doc) => doc.id !== documentId),
+          }
+        : lead
+    );
+    setLeads(updatedLeads);
   };
 
   const handleCancel = () => {
@@ -130,7 +169,9 @@ const LeadsPage: React.FC = () => {
       {showForm && (
         <Card sx={{ width: 350, mb: 3 }}>
           <CardContent>
-            <Typography variant="h5" fontWeight="bold">Add New Lead</Typography>
+            <Typography variant="h5" fontWeight="bold">
+              Add New Lead
+            </Typography>
             <TextField
               fullWidth
               label="Name"
@@ -176,7 +217,9 @@ const LeadsPage: React.FC = () => {
       {showEditPanel && editingLead && (
         <Card sx={{ width: 350, mb: 3 }}>
           <CardContent>
-            <Typography variant="h5" fontWeight="bold">Edit Lead</Typography>
+            <Typography variant="h5" fontWeight="bold">
+              Edit Lead
+            </Typography>
             <TextField
               fullWidth
               label="Name"
@@ -227,9 +270,18 @@ const LeadsPage: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><b>Name</b></TableCell>
-              <TableCell><b>Phone Number</b></TableCell>
-              <TableCell><b>Actions</b></TableCell>
+              <TableCell>
+                <b>Name</b>
+              </TableCell>
+              <TableCell>
+                <b>Phone Number</b>
+              </TableCell>
+              <TableCell>
+                <b>Documents</b>
+              </TableCell>
+              <TableCell>
+                <b>Actions</b>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -238,6 +290,35 @@ const LeadsPage: React.FC = () => {
                 <TableRow key={lead.id}>
                   <TableCell>{lead.name}</TableCell>
                   <TableCell>{lead.phone}</TableCell>
+                  <TableCell>
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleUploadDocument(lead.id, e.target.files[0]);
+                        }
+                      }}
+                      style={{ display: "none" }}
+                      id={`upload-${lead.id}`}
+                    />
+                    <label htmlFor={`upload-${lead.id}`}>
+                      <Button variant="contained" component="span">
+                        Upload
+                      </Button>
+                    </label>
+                    <List>
+                      {lead.documents.map((doc) => (
+                        <ListItem key={doc.id}>
+                          <ListItemText primary={doc.name} />
+                          <IconButton
+                            onClick={() => handleDeleteDocument(lead.id, doc.id)}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="contained"
@@ -263,7 +344,7 @@ const LeadsPage: React.FC = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={3} align="center">
+                <TableCell colSpan={4} align="center">
                   No matching leads found.
                 </TableCell>
               </TableRow>

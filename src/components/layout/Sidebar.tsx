@@ -1,7 +1,5 @@
 import React from 'react';
 import { List, ListItem, ListItemIcon, ListItemText, Divider, Typography, Box } from '@mui/material';
-// import { People, Home, Dashboard} from '@mui/icons-material';
-// import {Building } from "lucide-react" // New icons added
 import { Home, Users, Building } from "lucide-react"
 
 import { Link } from 'react-router-dom';
