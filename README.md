@@ -21,7 +21,7 @@ Clone the repository to your local machine using the following command:
 "cd real-estate-crm"
 
 ## Step 2: Install Dependencies
-Install the required dependencies for both the frontend
+Install the required dependencies for the frontend
 
 ## Dependency Issues: 
 If you encounter dependency issues, delete the node_modules folder and package-lock.json file, then run 
