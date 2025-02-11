@@ -1,6 +1,31 @@
-# Getting Started with Create React App
+## Live Preview Vercel Hosting.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+------ https://real-estate-crm-dashboard.vercel.app/dashboard-------
+
+
+## Frontend technologies:
+
+React.js: A JavaScript library for building user interfaces.
+
+TypeScript: A strongly typed superset of JavaScript for better code quality and maintainability.
+
+Material-UI (MUI): A popular React UI framework for building responsive and visually appealing components.
+
+React Router DOM: A library for handling client-side routing in React applications.
+
+## Step 1: Clone the Repository
+Clone the repository to your local machine using the following command:
+
+## git clone https://github.com/your-username/real-estate-crm.git
+
+"cd real-estate-crm"
+
+## Step 2: Install Dependencies
+Install the required dependencies for both the frontend
+
+## Dependency Issues: 
+If you encounter dependency issues, delete the node_modules folder and package-lock.json file, then run 
+### 'npm install'.
 
 ## Available Scripts
 
@@ -27,7 +52,6 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
 ### `npm run eject`
 
